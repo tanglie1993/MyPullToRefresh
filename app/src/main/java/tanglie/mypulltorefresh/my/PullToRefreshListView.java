@@ -1,6 +1,7 @@
 package tanglie.mypulltorefresh.my;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
@@ -72,8 +73,7 @@ public class PullToRefreshListView extends LinearLayout {
 
     public void addHeaderView(View view){
         headerView = view;
-        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL);
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 100);
         addView(view, 0, lp);
         invalidate();
     }
