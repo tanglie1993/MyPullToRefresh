@@ -56,13 +56,13 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
 //            }
 //        });
 
-        new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    headerView.setVisibility(View.VISIBLE);
-                    scrollTo(0, headerView.getMeasuredHeight());
-                }
-            }, 3000);
+        post(new Runnable() {
+            @Override
+            public void run() {
+                headerView.setVisibility(View.VISIBLE);
+                scrollTo(0, headerView.getMeasuredHeight());
+            }
+        });
     }
 
     @Override
@@ -102,6 +102,8 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
 
     @Override
     public void onOverScroll(int deltaY) {
-        scrollBy(0, deltaY);
+        if(getScrollY() + deltaY > 0){
+            scrollBy(0, deltaY);
+        }
     }
 }
