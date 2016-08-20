@@ -51,7 +51,7 @@ public class PullToRefreshListView extends LinearLayout {
             @Override
             public void run() {
                 headerView.setVisibility(View.VISIBLE);
-//                scrollTo(0, 100);
+                scrollTo(0, headerView.getMeasuredHeight());
             }
         }, 3000);
     }
@@ -80,7 +80,7 @@ public class PullToRefreshListView extends LinearLayout {
 
     public void addHeaderView(View view){
         headerView = view;
-        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 100);
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, view.getMeasuredHeight());
         addView(view, 0, lp);
         view.setVisibility(GONE);
         invalidate();
