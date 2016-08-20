@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
         PullToRefreshListView lv = (PullToRefreshListView) findViewById(R.id.listView);//得到ListView对象的引用 /*为ListView设置Adapter来绑定数据*/
         lv.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strs));
         View view = getLayoutInflater().inflate(R.layout.header_view, (ViewGroup) findViewById(R.id.rootView), false);
-        measureView(view);
+//        measureView(view);
         lv.addHeaderView(view);
     }
 
@@ -53,23 +53,23 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void measureView(View child) {
-        ViewGroup.LayoutParams lp = child.getLayoutParams();
-        if(lp == null){
-            lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
-        //headerView的宽度信息
-        int childMeasureWidth = ViewGroup.getChildMeasureSpec(0, 0, lp.width);
-        int childMeasureHeight;
-        if(lp.height > 0){
-            childMeasureHeight = View.MeasureSpec.makeMeasureSpec(lp.height, View.MeasureSpec.EXACTLY);
-            //最后一个参数表示：适合、匹配
-        } else {
-            childMeasureHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);//未指定
-        }
-//System.out.println("childViewWidth"+childMeasureWidth);
-//System.out.println("childViewHeight"+childMeasureHeight);
-        //将宽和高设置给child
-        child.measure(childMeasureWidth, childMeasureHeight);
-    }
+//    private void measureView(View child) {
+//        ViewGroup.LayoutParams lp = child.getLayoutParams();
+//        if(lp == null){
+//            lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.FILL_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//        }
+//        //headerView的宽度信息
+//        int childMeasureWidth = ViewGroup.getChildMeasureSpec(0, 0, lp.width);
+//        int childMeasureHeight;
+//        if(lp.height > 0){
+//            childMeasureHeight = View.MeasureSpec.makeMeasureSpec(lp.height, View.MeasureSpec.EXACTLY);
+//            //最后一个参数表示：适合、匹配
+//        } else {
+//            childMeasureHeight = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);//未指定
+//        }
+////System.out.println("childViewWidth"+childMeasureWidth);
+////System.out.println("childViewHeight"+childMeasureHeight);
+//        //将宽和高设置给child
+//        child.measure(childMeasureWidth, childMeasureHeight);
+//    }
 }

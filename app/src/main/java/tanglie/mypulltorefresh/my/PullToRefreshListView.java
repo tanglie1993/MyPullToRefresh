@@ -48,19 +48,12 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         addView(listView, 0, params);
-//        post(new Runnable() {
-//            @Override
-//            public void run() {
-//                headerView.setVisibility(View.VISIBLE);
-//                scrollTo(0, headerView.getMeasuredHeight());
-//            }
-//        });
 
         post(new Runnable() {
             @Override
             public void run() {
                 headerView.setVisibility(View.VISIBLE);
-                scrollTo(0, headerView.getMeasuredHeight());
+                scrollTo(0, headerView.getLayoutParams().height);
             }
         });
     }
@@ -89,7 +82,8 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
 
     public void addHeaderView(View view){
         headerView = view;
-        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, view.getMeasuredHeight());
+        int height = view.getLayoutParams().height;
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, height);
         addView(view, 0, lp);
         view.setVisibility(GONE);
         invalidate();
