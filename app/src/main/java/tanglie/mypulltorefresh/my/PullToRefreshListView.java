@@ -16,7 +16,7 @@ import org.w3c.dom.ProcessingInstruction;
 /**
  * Created by Administrator on 2016/8/15 0015.
  */
-public class PullToRefreshListView extends LinearLayout {
+public class PullToRefreshListView extends LinearLayout implements OverscrollListView.OverScrollListener {
 
     private View headerView;
     private OverscrollListView listView;
@@ -44,16 +44,25 @@ public class PullToRefreshListView extends LinearLayout {
     private void init(Context context) {
         setOrientation(VERTICAL);
         listView = new OverscrollListView(context);
+        listView.setOverScrollListener(this);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         addView(listView, 0, params);
+//        post(new Runnable() {
+//            @Override
+//            public void run() {
+//                headerView.setVisibility(View.VISIBLE);
+//                scrollTo(0, headerView.getMeasuredHeight());
+//            }
+//        });
+
         new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                headerView.setVisibility(View.VISIBLE);
-                scrollTo(0, headerView.getMeasuredHeight());
-            }
-        }, 3000);
+                @Override
+                public void run() {
+                    headerView.setVisibility(View.VISIBLE);
+                    scrollTo(0, headerView.getMeasuredHeight());
+                }
+            }, 3000);
     }
 
     @Override
@@ -89,5 +98,10 @@ public class PullToRefreshListView extends LinearLayout {
     public void setAdapter(ArrayAdapter<String> stringArrayAdapter) {
         listView.setAdapter(stringArrayAdapter);
         invalidate();
+    }
+
+    @Override
+    public void onOverScroll(int deltaY) {
+        scrollBy(0, deltaY);
     }
 }
