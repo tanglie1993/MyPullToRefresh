@@ -4,32 +4,48 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 
 import org.w3c.dom.ProcessingInstruction;
 
 /**
  * Created by Administrator on 2016/8/15 0015.
  */
-public class PullToRefreshListView extends ListView {
+public class PullToRefreshListView extends LinearLayout {
 
     private View headerView;
+    private ListView listView;
 
     public PullToRefreshListView(Context context) {
         super(context);
+        init(context);
     }
 
     public PullToRefreshListView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        init(context);
     }
 
     public PullToRefreshListView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init(context);
     }
 
     public PullToRefreshListView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        init(context);
+    }
+
+    private void init(Context context) {
+        setOrientation(VERTICAL);
+        listView = new ListView(context);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT);
+        addView(listView, 0, params);
     }
 
     @Override
@@ -51,23 +67,19 @@ public class PullToRefreshListView extends ListView {
         System.out.println("----------分割线----------");
 
         headerView.setVisibility(View.VISIBLE);
-//        headerView.scrollBy(0, scrollY);
-
-
         return returnValue;
     }
 
-    @Override
     public void addHeaderView(View view){
+        headerView = view;
         final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL);
+        addView(view, 0, lp);
+        invalidate();
+    }
 
-        FrameLayout frame = new FrameLayout(getContext());
-        view.setVisibility(View.GONE);
-        frame.addView(view, lp);
-
-        this.headerView = view;
-        super.addHeaderView(frame);
-
+    public void setAdapter(ArrayAdapter<String> stringArrayAdapter) {
+        listView.setAdapter(stringArrayAdapter);
+        invalidate();
     }
 }
