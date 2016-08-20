@@ -8,6 +8,13 @@ import android.widget.ListView;
  * Created by Administrator on 2016/8/20 0020.
  */
 public class OverscrollListView extends ListView{
+
+    public interface OverScrollListener{
+        void onOverScroll(int deltaY);
+    }
+
+    private OverScrollListener overScrollListener;
+
     public OverscrollListView(Context context) {
         super(context);
     }
@@ -24,13 +31,17 @@ public class OverscrollListView extends ListView{
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    public void setOverScrollListener(OverScrollListener overScrollListener) {
+        this.overScrollListener = overScrollListener;
+    }
+
     @Override
     protected boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY, int scrollRangeX,
                                    int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
 
         final boolean returnValue = super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX,
                 scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
-
+        overScrollListener.onOverScroll(deltaY);
         System.out.println("deltaX: " + deltaX);
         System.out.println("deltaY: " + deltaY);
         System.out.println("scrollX: " + scrollX);
