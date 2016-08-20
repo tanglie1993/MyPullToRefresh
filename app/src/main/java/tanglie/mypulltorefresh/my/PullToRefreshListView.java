@@ -19,7 +19,7 @@ import org.w3c.dom.ProcessingInstruction;
 public class PullToRefreshListView extends LinearLayout {
 
     private View headerView;
-    private ListView listView;
+    private OverscrollListView listView;
 
     public PullToRefreshListView(Context context) {
         super(context);
@@ -43,10 +43,17 @@ public class PullToRefreshListView extends LinearLayout {
 
     private void init(Context context) {
         setOrientation(VERTICAL);
-        listView = new ListView(context);
+        listView = new OverscrollListView(context);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT);
         addView(listView, 0, params);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                headerView.setVisibility(View.VISIBLE);
+//                scrollTo(0, 100);
+            }
+        }, 3000);
     }
 
     @Override
@@ -75,6 +82,7 @@ public class PullToRefreshListView extends LinearLayout {
         headerView = view;
         final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 100);
         addView(view, 0, lp);
+        view.setVisibility(GONE);
         invalidate();
     }
 
