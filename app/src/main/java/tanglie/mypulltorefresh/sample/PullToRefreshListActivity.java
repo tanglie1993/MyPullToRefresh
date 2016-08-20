@@ -36,7 +36,6 @@ import java.util.LinkedList;
 import tanglie.mypulltorefresh.R;
 import tanglie.mypulltorefresh.library.PullToRefreshBase;
 import tanglie.mypulltorefresh.library.PullToRefreshListView;
-import tanglie.mypulltorefresh.library.extras.SoundPullEventListener;
 
 public final class PullToRefreshListActivity extends ListActivity {
 
