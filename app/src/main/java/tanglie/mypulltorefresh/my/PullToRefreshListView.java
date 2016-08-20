@@ -1,4 +1,4 @@
-package tanglie.mypulltorefresh;
+package tanglie.mypulltorefresh.my;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -1,4 +1,4 @@
-package tanglie.mypulltorefresh;
+package tanglie.mypulltorefresh.my;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -6,7 +6,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+
+import tanglie.mypulltorefresh.R;
 
 public class MainActivity extends Activity {
 
