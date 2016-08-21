@@ -99,6 +99,9 @@ public class PullToRefreshListView extends LinearLayout {
             currentMotionSeriesStartY = event.getY();
             listView.onTouchEvent(event);
         }else if(event.getAction() == MotionEvent.ACTION_MOVE){
+            if(currentState == State.LOADING || currentState == State.RESETTING){
+                return true;
+            }
             if(event.getY() > currentMotionSeriesStartY
                     && listView.getFirstVisiblePosition() == 0
                     && listView.getChildAt(0).getY() == 0){
@@ -120,8 +123,10 @@ public class PullToRefreshListView extends LinearLayout {
                 listView.onTouchEvent(event);
             }
         }else if(event.getAction() == MotionEvent.ACTION_UP){
+            listView.onTouchEvent(event);
             onMotionSeriesFinish(event);
         }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
+            listView.onTouchEvent(event);
             onMotionSeriesFinish(event);
         }
         return true;
@@ -131,7 +136,6 @@ public class PullToRefreshListView extends LinearLayout {
         int deltaY = (int) (event.getY() - currentDragStartY);
         currentDragStartY = 0;
         currentMotionSeriesStartY = 0;
-        listView.onTouchEvent(event);
         if(currentState == State.RELEASE_TO_REFRESH){
             reset(deltaY);
         }else if(currentState == State.DRAGGING){
