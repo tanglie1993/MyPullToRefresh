@@ -28,7 +28,7 @@ public class MainActivity extends Activity {
         lv.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strs));
         View view = getLayoutInflater().inflate(R.layout.header_view, (ViewGroup) findViewById(R.id.rootView), false);
 //        measureView(view);
-        lv.addHeaderView(view);
+        lv.init(view, this);
     }
 
     @Override
