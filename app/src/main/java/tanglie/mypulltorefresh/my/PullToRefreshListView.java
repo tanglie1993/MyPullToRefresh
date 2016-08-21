@@ -115,11 +115,7 @@ public class PullToRefreshListView extends LinearLayout {
 
     @Override
      public boolean onInterceptTouchEvent(MotionEvent event){
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
-            return listView.getFirstVisiblePosition() == 0 && listView.getChildAt(0).getTop() == 0;
-        }else{
-            return true;
-        }
+        return true;
     }
 
     @Override
