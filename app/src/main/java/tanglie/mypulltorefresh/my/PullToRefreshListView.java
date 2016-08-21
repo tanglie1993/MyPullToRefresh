@@ -1,17 +1,13 @@
 package tanglie.mypulltorefresh.my;
 
 import android.content.Context;
-import android.os.Handler;
 import android.util.AttributeSet;
-import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
-
-import org.w3c.dom.ProcessingInstruction;
 
 /**
  * Created by Administrator on 2016/8/15 0015.
@@ -20,6 +16,9 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
 
     private View headerView;
     private OverscrollListView listView;
+
+    private boolean isScrolling = false;
+    private float lastEventY;
 
     public PullToRefreshListView(Context context) {
         super(context);
@@ -99,5 +98,33 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
         if(getScrollY() + deltaY > 0){
             scrollBy(0, deltaY);
         }
+    }
+
+    @Override
+     public boolean onInterceptTouchEvent(MotionEvent event){
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            return listView.getScrollY() == 0;
+        }else{
+            return isScrolling;
+        }
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        if(event.getAction() == MotionEvent.ACTION_DOWN){
+            isScrolling = true;
+            lastEventY = event.getY();
+        }else if(event.getAction() == MotionEvent.ACTION_MOVE){
+            float deltaY = event.getY() - lastEventY;
+            lastEventY = event.getY();
+            onOverScroll(-(int) deltaY);
+        }else if(event.getAction() == MotionEvent.ACTION_UP){
+            lastEventY = 0;
+            isScrolling = false;
+        }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
+            lastEventY = 0;
+            isScrolling = false;
+        }
+        return true;
     }
 }
