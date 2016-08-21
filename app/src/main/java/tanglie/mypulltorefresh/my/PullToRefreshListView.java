@@ -57,44 +57,14 @@ public class PullToRefreshListView extends LinearLayout {
         setOrientation(VERTICAL);
         listView = new ListView(context);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.MATCH_PARENT);
+                1860 + 600);
         addView(listView, 0, params);
-
-        post(new Runnable() {
-            @Override
-            public void run() {
-                headerView.setVisibility(View.VISIBLE);
-                onOverScroll(0);
-            }
-        });
-    }
-
-    @Override
-    protected boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY, int scrollRangeX,
-                                   int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
-
-        final boolean returnValue = super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX,
-                scrollRangeY, maxOverScrollX, maxOverScrollY, isTouchEvent);
-
-        System.out.println("deltaX: " + deltaX);
-        System.out.println("deltaY: " + deltaY);
-        System.out.println("scrollX: " + scrollX);
-        System.out.println("scrollY: " + scrollY);
-        System.out.println("scrollRangeX: " + scrollRangeX);
-        System.out.println("scrollRangeY: " + scrollRangeY);
-        System.out.println("maxOverScrollX: " + maxOverScrollX);
-        System.out.println("maxOverScrollY: " + maxOverScrollY);
-        System.out.println("isTouchEvent: " + isTouchEvent);
-        System.out.println("----------分割线----------");
-
-        headerView.setVisibility(View.VISIBLE);
-        return returnValue;
     }
 
     public void addHeaderView(View view){
         headerView = view;
         headerMaxHeight = view.getLayoutParams().height;
-        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, view.getLayoutParams().height);
         addView(view, 0, lp);
         view.setVisibility(GONE);
         invalidate();
@@ -107,9 +77,10 @@ public class PullToRefreshListView extends LinearLayout {
 
     public void onOverScroll(float scrollY) {
         if(scrollY < headerMaxHeight){
-            ViewGroup.LayoutParams params = headerView.getLayoutParams();
-            params.height = (int) scrollY;
-            headerView.setLayoutParams(params);
+            if(headerView.getVisibility() != View.VISIBLE){
+                headerView.setVisibility(View.VISIBLE);
+            }
+            scrollTo(0, headerMaxHeight - (int) scrollY);
         }
     }
 
@@ -137,33 +108,35 @@ public class PullToRefreshListView extends LinearLayout {
                 listView.onTouchEvent(event);
             }
         }else if(event.getAction() == MotionEvent.ACTION_UP){
+            int deltaY = (int) (event.getY() - currentDragStartY);
             currentDragStartY = 0;
             listView.onTouchEvent(event);
             if(currentState == State.RELEASE_TO_REFRESH){
-                reset();
+                reset(deltaY);
             }else if(currentState == State.DRAGGING){
-                reset();
+                reset(deltaY);
             }
         }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
+            int deltaY = (int) (event.getY() - currentDragStartY);
             currentDragStartY = 0;
             listView.onTouchEvent(event);
             if(currentState == State.RELEASE_TO_REFRESH){
-                reset();
+                reset(deltaY);
             }else if(currentState == State.DRAGGING){
-                reset();
+                reset(deltaY);
             }
         }
         return true;
     }
 
-    private void reset() {
+    private void reset(int deltaY) {
         currentState = State.RESETTING;
-        final ValueAnimator animator = ValueAnimator.ofFloat((float) headerView.getLayoutParams().height, (float) 0);
+        final ValueAnimator animator = ValueAnimator.ofInt(deltaY, 0);
         animator.setDuration(1000);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float height = (Float) valueAnimator.getAnimatedValue();
+                float height = (Integer) valueAnimator.getAnimatedValue();
                 onOverScroll(height);
             }
         });
@@ -178,6 +151,7 @@ public class PullToRefreshListView extends LinearLayout {
                 currentState = State.NO_OVERSCROLL;
                 TextView headerTextView = (TextView) headerView.findViewById(R.id.headerTextView);
                 headerTextView.setText("Pull To Refresh");
+//                headerView.setVisibility(View.GONE);
             }
 
             @Override
