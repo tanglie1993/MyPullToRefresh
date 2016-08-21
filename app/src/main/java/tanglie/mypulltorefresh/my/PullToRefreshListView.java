@@ -23,6 +23,8 @@ public class PullToRefreshListView extends LinearLayout {
     private boolean isScrolling = false;
     private float currentDragStartY;
 
+    private int headerMaxHeight;
+
     public PullToRefreshListView(Context context) {
         super(context);
         init(context);
@@ -83,6 +85,7 @@ public class PullToRefreshListView extends LinearLayout {
 
     public void addHeaderView(View view){
         headerView = view;
+        headerMaxHeight = view.getLayoutParams().height;
         final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         addView(view, 0, lp);
         view.setVisibility(GONE);
@@ -95,9 +98,11 @@ public class PullToRefreshListView extends LinearLayout {
     }
 
     public void onOverScroll(float scrollY) {
-        ViewGroup.LayoutParams params = headerView.getLayoutParams();
-        params.height = (int) scrollY;
-        headerView.setLayoutParams(params);
+        if(scrollY < headerMaxHeight){
+            ViewGroup.LayoutParams params = headerView.getLayoutParams();
+            params.height = (int) scrollY;
+            headerView.setLayoutParams(params);
+        }
     }
 
     @Override
@@ -114,15 +119,24 @@ public class PullToRefreshListView extends LinearLayout {
         if(event.getAction() == MotionEvent.ACTION_DOWN){
             isScrolling = true;
             currentDragStartY = event.getY();
+            listView.onTouchEvent(event);
         }else if(event.getAction() == MotionEvent.ACTION_MOVE){
-            float deltaY = event.getY() - currentDragStartY;
-            onOverScroll(deltaY);
+            if(event.getY() > currentDragStartY){
+                float deltaY = event.getY() - currentDragStartY;
+                onOverScroll(deltaY);
+            }else{
+                listView.scrollListBy((int) (currentDragStartY - event.getY()));
+                listView.onTouchEvent(event);
+            }
+
         }else if(event.getAction() == MotionEvent.ACTION_UP){
             currentDragStartY = 0;
             isScrolling = false;
+            listView.onTouchEvent(event);
         }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
             currentDragStartY = 0;
             isScrolling = false;
+            listView.onTouchEvent(event);
         }
         return true;
     }
