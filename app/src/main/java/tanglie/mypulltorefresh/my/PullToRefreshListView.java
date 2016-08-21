@@ -83,13 +83,9 @@ public class PullToRefreshListView extends LinearLayout {
 
     public void addHeaderView(View view){
         headerView = view;
-        int height = view.getLayoutParams().height;
-        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, height);
+        final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
         addView(view, 0, lp);
         view.setVisibility(GONE);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        listView.setLayoutParams(params);
         invalidate();
     }
 
