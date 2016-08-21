@@ -1,24 +1,27 @@
 package tanglie.mypulltorefresh.my;
 
 import android.content.Context;
+import android.content.pm.LabeledIntent;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 
 /**
  * Created by Administrator on 2016/8/15 0015.
  */
-public class PullToRefreshListView extends LinearLayout implements OverscrollListView.OverScrollListener {
+public class PullToRefreshListView extends LinearLayout {
 
     private View headerView;
-    private OverscrollListView listView;
+    private ListView listView;
 
     private boolean isScrolling = false;
-    private float lastEventY;
+    private float currentDragStartY;
 
     public PullToRefreshListView(Context context) {
         super(context);
@@ -43,16 +46,15 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
     private void init(Context context) {
         setOrientation(VERTICAL);
         listView = new OverscrollListView(context);
-        listView.setOverScrollListener(this);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
-                RelativeLayout.LayoutParams.WRAP_CONTENT);
+                RelativeLayout.LayoutParams.MATCH_PARENT);
         addView(listView, 0, params);
 
         post(new Runnable() {
             @Override
             public void run() {
                 headerView.setVisibility(View.VISIBLE);
-                scrollTo(0, headerView.getLayoutParams().height);
+                onOverScroll(0);
             }
         });
     }
@@ -85,6 +87,9 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
         final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, height);
         addView(view, 0, lp);
         view.setVisibility(GONE);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        listView.setLayoutParams(params);
         invalidate();
     }
 
@@ -93,11 +98,10 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
         invalidate();
     }
 
-    @Override
-    public void onOverScroll(int deltaY) {
-        if(getScrollY() + deltaY > 0){
-            scrollBy(0, deltaY);
-        }
+    public void onOverScroll(float scrollY) {
+        ViewGroup.LayoutParams params = headerView.getLayoutParams();
+        params.height = (int) scrollY;
+        headerView.setLayoutParams(params);
     }
 
     @Override
@@ -113,16 +117,15 @@ public class PullToRefreshListView extends LinearLayout implements OverscrollLis
     public boolean onTouchEvent(MotionEvent event){
         if(event.getAction() == MotionEvent.ACTION_DOWN){
             isScrolling = true;
-            lastEventY = event.getY();
+            currentDragStartY = event.getY();
         }else if(event.getAction() == MotionEvent.ACTION_MOVE){
-            float deltaY = event.getY() - lastEventY;
-            lastEventY = event.getY();
-            onOverScroll(-(int) deltaY);
+            float deltaY = event.getY() - currentDragStartY;
+            onOverScroll(deltaY);
         }else if(event.getAction() == MotionEvent.ACTION_UP){
-            lastEventY = 0;
+            currentDragStartY = 0;
             isScrolling = false;
         }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
-            lastEventY = 0;
+            currentDragStartY = 0;
             isScrolling = false;
         }
         return true;
