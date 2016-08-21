@@ -26,6 +26,7 @@ public class PullToRefreshListView extends LinearLayout {
     private ListView listView;
 
     private float currentDragStartY;
+    private float currentMotionSeriesStartY;
     private State currentState = State.NO_OVERSCROLL;
 
     private int headerMaxHeight;
@@ -95,9 +96,10 @@ public class PullToRefreshListView extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event){
         if(event.getAction() == MotionEvent.ACTION_DOWN){
+            currentMotionSeriesStartY = event.getY();
             listView.onTouchEvent(event);
         }else if(event.getAction() == MotionEvent.ACTION_MOVE){
-            if(event.getY() > currentDragStartY
+            if(event.getY() > currentMotionSeriesStartY
                     && listView.getFirstVisiblePosition() == 0
                     && listView.getChildAt(0).getY() == 0){
                 currentState = State.DRAGGING;
@@ -109,22 +111,26 @@ public class PullToRefreshListView extends LinearLayout {
                     currentState = State.RELEASE_TO_REFRESH;
                     TextView headerTextView= (TextView) headerView.findViewById(R.id.headerTextView);
                     headerTextView.setText("Release To Refresh");
+                }else{
+                    currentState = State.DRAGGING;
                 }
                 setOverScrollHeight(deltaY);
             }else {
+                currentState = State.NO_OVERSCROLL;
                 listView.onTouchEvent(event);
             }
         }else if(event.getAction() == MotionEvent.ACTION_UP){
-            onEventFinish(event);
+            onMotionSeriesFinish(event);
         }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
-            onEventFinish(event);
+            onMotionSeriesFinish(event);
         }
         return true;
     }
 
-    private void onEventFinish(MotionEvent event) {
+    private void onMotionSeriesFinish(MotionEvent event) {
         int deltaY = (int) (event.getY() - currentDragStartY);
         currentDragStartY = 0;
+        currentMotionSeriesStartY = 0;
         listView.onTouchEvent(event);
         if(currentState == State.RELEASE_TO_REFRESH){
             reset(deltaY);
