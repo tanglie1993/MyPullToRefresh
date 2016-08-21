@@ -3,12 +3,9 @@ package tanglie.mypulltorefresh.my;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.pm.LabeledIntent;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.animation.Animation;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -81,7 +78,7 @@ public class PullToRefreshListView extends LinearLayout {
         invalidate();
     }
 
-    public void onOverScroll(float scrollY) {
+    public void setOverScrollHeight(float scrollY) {
         if(scrollY < headerMaxHeight){
             if(headerView.getVisibility() != View.VISIBLE){
                 headerView.setVisibility(View.VISIBLE);
@@ -98,41 +95,42 @@ public class PullToRefreshListView extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event){
         if(event.getAction() == MotionEvent.ACTION_DOWN){
-            currentState = State.DRAGGING;
-            currentDragStartY = event.getY();
             listView.onTouchEvent(event);
         }else if(event.getAction() == MotionEvent.ACTION_MOVE){
-            if(event.getY() > currentDragStartY){
+            if(event.getY() > currentDragStartY
+                    && listView.getFirstVisiblePosition() == 0
+                    && listView.getChildAt(0).getY() == 0){
+                currentState = State.DRAGGING;
+                if(currentDragStartY == 0){
+                    currentDragStartY = event.getY();
+                }
                 float deltaY = event.getY() - currentDragStartY;
                 if(deltaY > RELEASE_TO_REFRESH_THRESHOLD){
                     currentState = State.RELEASE_TO_REFRESH;
                     TextView headerTextView= (TextView) headerView.findViewById(R.id.headerTextView);
                     headerTextView.setText("Release To Refresh");
                 }
-                onOverScroll(deltaY);
+                setOverScrollHeight(deltaY);
             }else {
                 listView.onTouchEvent(event);
             }
         }else if(event.getAction() == MotionEvent.ACTION_UP){
-            int deltaY = (int) (event.getY() - currentDragStartY);
-            currentDragStartY = 0;
-            listView.onTouchEvent(event);
-            if(currentState == State.RELEASE_TO_REFRESH){
-                reset(deltaY);
-            }else if(currentState == State.DRAGGING){
-                reset(deltaY);
-            }
+            onEventFinish(event);
         }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
-            int deltaY = (int) (event.getY() - currentDragStartY);
-            currentDragStartY = 0;
-            listView.onTouchEvent(event);
-            if(currentState == State.RELEASE_TO_REFRESH){
-                reset(deltaY);
-            }else if(currentState == State.DRAGGING){
-                reset(deltaY);
-            }
+            onEventFinish(event);
         }
         return true;
+    }
+
+    private void onEventFinish(MotionEvent event) {
+        int deltaY = (int) (event.getY() - currentDragStartY);
+        currentDragStartY = 0;
+        listView.onTouchEvent(event);
+        if(currentState == State.RELEASE_TO_REFRESH){
+            reset(deltaY);
+        }else if(currentState == State.DRAGGING){
+            reset(deltaY);
+        }
     }
 
     private void reset(int deltaY) {
@@ -143,7 +141,7 @@ public class PullToRefreshListView extends LinearLayout {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
                 float height = (Integer) valueAnimator.getAnimatedValue();
-                onOverScroll(height);
+                setOverScrollHeight(height);
             }
         });
         animator.addListener(new Animator.AnimatorListener() {
