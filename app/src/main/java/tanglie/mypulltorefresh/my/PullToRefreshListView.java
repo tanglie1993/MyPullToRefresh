@@ -47,7 +47,7 @@ public class PullToRefreshListView extends LinearLayout {
 
     private void init(Context context) {
         setOrientation(VERTICAL);
-        listView = new OverscrollListView(context);
+        listView = new ListView(context);
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT,
                 RelativeLayout.LayoutParams.MATCH_PARENT);
         addView(listView, 0, params);
@@ -108,7 +108,7 @@ public class PullToRefreshListView extends LinearLayout {
     @Override
      public boolean onInterceptTouchEvent(MotionEvent event){
         if(event.getAction() == MotionEvent.ACTION_DOWN){
-            return listView.getScrollY() == 0;
+            return listView.getFirstVisiblePosition() == 0 && listView.getChildAt(0).getTop() == 0;
         }else{
             return isScrolling;
         }
@@ -125,10 +125,8 @@ public class PullToRefreshListView extends LinearLayout {
                 float deltaY = event.getY() - currentDragStartY;
                 onOverScroll(deltaY);
             }else{
-                listView.scrollListBy((int) (currentDragStartY - event.getY()));
                 listView.onTouchEvent(event);
             }
-
         }else if(event.getAction() == MotionEvent.ACTION_UP){
             currentDragStartY = 0;
             isScrolling = false;
