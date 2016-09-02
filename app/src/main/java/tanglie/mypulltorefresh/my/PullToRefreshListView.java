@@ -28,6 +28,9 @@ public class PullToRefreshListView extends LinearLayout {
     private static final int RELEASE_TO_REFRESH_THRESHOLD = 300;
 
     private View headerView;
+    private TextView headerTextView;
+    private ImageView hintImageView;
+
     private ListView listView;
 
     private float currentDragStartY;
@@ -69,11 +72,15 @@ public class PullToRefreshListView extends LinearLayout {
         listView = new ListView(context);
     }
 
-    public void init(View headerView, Context context) {
+    public void init(View headerView) {
         if (this.headerView != null) {
             return;
         }
         this.headerView = headerView;
+        headerTextView = (TextView) headerView.findViewById(R.id.headerTextView);
+        hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
+        hintImageView.setScaleType(ImageView.ScaleType.MATRIX);
+        hintImageView.setImageMatrix(new Matrix());
         headerMaxHeight = headerView.getLayoutParams().height;
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -84,9 +91,7 @@ public class PullToRefreshListView extends LinearLayout {
         addView(headerView, 0, lp);
         headerView.setVisibility(GONE);
 
-        ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
-        hintImageView.setScaleType(ImageView.ScaleType.MATRIX);
-        hintImageView.setImageMatrix(new Matrix());
+
         invalidate();
     }
 
@@ -117,7 +122,7 @@ public class PullToRefreshListView extends LinearLayout {
             ViewGroup.LayoutParams params = listView.getLayoutParams();
             params.height = ScreenUtils.getScreenHeight(getContext()) - (int) scrollY;
             listView.setLayoutParams(params);
-            ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
+
             int centerX = hintImageView.getMeasuredWidth() / 2;
             int centerY = hintImageView.getMeasuredHeight() / 2;
             Matrix matrix = hintImageView.getImageMatrix();
@@ -151,7 +156,6 @@ public class PullToRefreshListView extends LinearLayout {
                 float deltaY = event.getY() - currentDragStartY;
                 if (deltaY > RELEASE_TO_REFRESH_THRESHOLD) {
                     currentState = State.RELEASE_TO_REFRESH;
-                    TextView headerTextView = (TextView) headerView.findViewById(R.id.headerTextView);
                     headerTextView.setText("Release To Refresh");
                 } else {
                     currentState = State.DRAGGING;
@@ -179,7 +183,6 @@ public class PullToRefreshListView extends LinearLayout {
                 loadingStartListener.onLoadingStart();
                 currentState = State.LOADING;
                 loadingAnimation = new RotateAnimation(0f, 108000f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
                 hintImageView.setAnimation(loadingAnimation);
                 loadingAnimation.setDuration(30000);
                 loadingAnimation.setRepeatMode(Animation.RESTART);
@@ -212,7 +215,7 @@ public class PullToRefreshListView extends LinearLayout {
             @Override
             public void onAnimationEnd(Animator animator) {
                 currentState = State.NO_OVERSCROLL;
-                TextView headerTextView = (TextView) headerView.findViewById(R.id.headerTextView);
+
                 headerTextView.setText("Pull To Refresh");
                 headerView.setVisibility(View.GONE);
                 scrollTo(0, 0);

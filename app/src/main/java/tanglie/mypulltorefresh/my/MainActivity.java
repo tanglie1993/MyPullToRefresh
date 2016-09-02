@@ -38,7 +38,7 @@ public class MainActivity extends Activity {
         });
         View view = getLayoutInflater().inflate(R.layout.header_view, (ViewGroup) findViewById(R.id.rootView), false);
 //        measureView(view);
-        lv.init(view, this);
+        lv.init(view);
     }
 
     @Override
