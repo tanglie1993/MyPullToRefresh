@@ -32,6 +32,12 @@ public class PullToRefreshListView extends LinearLayout {
 
     private int headerMaxHeight;
 
+    private LoadingStartListener loadingStartListener;
+
+    public interface LoadingStartListener{
+        void onLoadingStart();
+    }
+
     public PullToRefreshListView(Context context) {
         super(context);
         init(context);
@@ -73,6 +79,16 @@ public class PullToRefreshListView extends LinearLayout {
         headerView.setVisibility(GONE);
 
         invalidate();
+    }
+
+    public void setLoadingStartListener(LoadingStartListener loadingStartListener) {
+        this.loadingStartListener = loadingStartListener;
+    }
+
+    public void onLoadingFinish(){
+        if(currentState == State.LOADING){
+            reset();
+        }
     }
 
     public void setAdapter(ArrayAdapter<String> stringArrayAdapter) {
@@ -137,17 +153,20 @@ public class PullToRefreshListView extends LinearLayout {
     }
 
     private void onMotionSeriesFinish(MotionEvent event) {
-        int deltaY = (int) (event.getY() - currentDragStartY);
         currentDragStartY = 0;
         currentMotionSeriesStartY = 0;
         if(currentState == State.RELEASE_TO_REFRESH){
-            reset(deltaY);
+            if(loadingStartListener != null){
+                loadingStartListener.onLoadingStart();
+                currentState = State.LOADING;
+            }
         }else if(currentState == State.DRAGGING){
-            reset(deltaY);
+            reset();
         }
     }
 
-    private void reset(int deltaY) {
+    private void reset() {
+        int deltaY = headerMaxHeight - getScrollY();
         currentState = State.RESETTING;
         final ValueAnimator animator = ValueAnimator.ofInt(deltaY, 0);
         animator.setDuration(1000);
