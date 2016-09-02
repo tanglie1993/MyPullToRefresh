@@ -143,7 +143,7 @@ public class PullToRefreshListView extends LinearLayout {
             currentMotionSeriesStartY = event.getY();
             listView.onTouchEvent(event);
         } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-            if (currentState == State.LOADING || currentState == State.RESETTING) {
+            if (currentState == State.LOADING || currentState == State.RECOILING) {
                 return true;
             }
             if (event.getY() > currentMotionSeriesStartY
@@ -179,9 +179,38 @@ public class PullToRefreshListView extends LinearLayout {
         currentDragStartY = 0;
         currentMotionSeriesStartY = 0;
         if (currentState == State.RELEASE_TO_REFRESH) {
-            if (loadingStartListener != null) {
-                loadingStartListener.onLoadingStart();
+            loadData();
+        } else if (currentState == State.DRAGGING) {
+            reset();
+        }
+    }
+
+    private void loadData() {
+
+        int deltaY = headerMaxHeight - getScrollY();
+        currentState = State.RECOILING;
+        final ValueAnimator animator = ValueAnimator.ofInt(deltaY, headerTextView.getMeasuredHeight());
+        animator.setDuration(500);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float height = (Integer) valueAnimator.getAnimatedValue();
+                setOverScrollHeight(height);
+            }
+        });
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
                 currentState = State.LOADING;
+                headerTextView.setText("Loading");
+                if (loadingStartListener != null) {
+                    loadingStartListener.onLoadingStart();
+                }
                 loadingAnimation = new RotateAnimation(0f, 108000f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
                 hintImageView.setAnimation(loadingAnimation);
                 loadingAnimation.setDuration(30000);
@@ -189,14 +218,24 @@ public class PullToRefreshListView extends LinearLayout {
                 loadingAnimation.startNow();
                 headerView.invalidate();
             }
-        } else if (currentState == State.DRAGGING) {
-            reset();
-        }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+        animator.start();
+
     }
 
     private void reset() {
         int deltaY = headerMaxHeight - getScrollY();
-        currentState = State.RESETTING;
+        currentState = State.RECOILING;
         final ValueAnimator animator = ValueAnimator.ofInt(deltaY, 0);
         animator.setDuration(1000);
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -215,12 +254,11 @@ public class PullToRefreshListView extends LinearLayout {
             @Override
             public void onAnimationEnd(Animator animator) {
                 currentState = State.NO_OVERSCROLL;
-
                 headerTextView.setText("Pull To Refresh");
                 headerView.setVisibility(View.GONE);
                 scrollTo(0, 0);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                LayoutParams params = new LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                 listView.setLayoutParams(params);
             }
 
@@ -235,6 +273,9 @@ public class PullToRefreshListView extends LinearLayout {
             }
         });
         animator.start();
+
+
+
 
     }
 }
