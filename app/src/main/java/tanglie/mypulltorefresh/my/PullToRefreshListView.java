@@ -3,6 +3,7 @@ package tanglie.mypulltorefresh.my;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.graphics.Matrix;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -83,6 +84,9 @@ public class PullToRefreshListView extends LinearLayout {
         addView(headerView, 0, lp);
         headerView.setVisibility(GONE);
 
+        ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
+        hintImageView.setScaleType(ImageView.ScaleType.MATRIX);
+        hintImageView.setImageMatrix(new Matrix());
         invalidate();
     }
 
@@ -113,6 +117,13 @@ public class PullToRefreshListView extends LinearLayout {
             ViewGroup.LayoutParams params = listView.getLayoutParams();
             params.height = ScreenUtils.getScreenHeight(getContext()) - (int) scrollY;
             listView.setLayoutParams(params);
+            ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
+            int centerX = hintImageView.getMeasuredWidth() / 2;
+            int centerY = hintImageView.getMeasuredHeight() / 2;
+            Matrix matrix = hintImageView.getImageMatrix();
+            matrix.postRotate(1, centerX, centerY);
+            hintImageView.setImageMatrix(matrix);
+            hintImageView.invalidate();
         }
     }
 
@@ -167,11 +178,10 @@ public class PullToRefreshListView extends LinearLayout {
             if (loadingStartListener != null) {
                 loadingStartListener.onLoadingStart();
                 currentState = State.LOADING;
-
-                loadingAnimation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                loadingAnimation = new RotateAnimation(0f, 108000f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
                 ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
                 hintImageView.setAnimation(loadingAnimation);
-                loadingAnimation.setDuration(3000);
+                loadingAnimation.setDuration(30000);
                 loadingAnimation.setRepeatMode(Animation.RESTART);
                 loadingAnimation.startNow();
                 headerView.invalidate();
