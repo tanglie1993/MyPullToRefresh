@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -64,7 +65,7 @@ public class PullToRefreshListView extends LinearLayout {
         headerMaxHeight = headerView.getLayoutParams().height;
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.MATCH_PARENT, ScreenUtils.getScreenHeight(context) + headerMaxHeight);
+                RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         addView(listView, 0, params);
 
         final FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, headerView.getLayoutParams().height);
@@ -85,6 +86,9 @@ public class PullToRefreshListView extends LinearLayout {
                 headerView.setVisibility(View.VISIBLE);
             }
             scrollTo(0, headerMaxHeight - (int) scrollY);
+            ViewGroup.LayoutParams params = listView.getLayoutParams();
+            params.height = ScreenUtils.getScreenHeight(getContext())  - (int) scrollY;
+            listView.setLayoutParams(params);
         }
     }
 
@@ -165,7 +169,11 @@ public class PullToRefreshListView extends LinearLayout {
                 currentState = State.NO_OVERSCROLL;
                 TextView headerTextView = (TextView) headerView.findViewById(R.id.headerTextView);
                 headerTextView.setText("Pull To Refresh");
-//                headerView.setVisibility(View.GONE);
+                headerView.setVisibility(View.GONE);
+                scrollTo(0, 0);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                listView.setLayoutParams(params);
             }
 
             @Override

@@ -11,19 +11,14 @@ import android.widget.ArrayAdapter;
 import tanglie.mypulltorefresh.R;
 
 public class MainActivity extends Activity {
-
-    private static final String[] strs = new String[] {
-        "first", "second", "third", "fourth", "fifth",
-            "first", "second", "third", "fourth", "fifth",
-            "first", "second", "third", "fourth", "fifth",
-            "first", "second", "third", "fourth", "fifth",
-            "first", "second", "third", "fourth", "fifth"
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        String[] strs = new String[20];
+        for(int i = 0; i < strs.length; i++){
+            strs[i] = ""+i;
+        }
         PullToRefreshListView lv = (PullToRefreshListView) findViewById(R.id.listView);//得到ListView对象的引用 /*为ListView设置Adapter来绑定数据*/
         lv.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, strs));
         View view = getLayoutInflater().inflate(R.layout.header_view, (ViewGroup) findViewById(R.id.rootView), false);
