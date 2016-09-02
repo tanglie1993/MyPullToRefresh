@@ -7,8 +7,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.ArrayAdapter;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -34,7 +37,9 @@ public class PullToRefreshListView extends LinearLayout {
 
     private LoadingStartListener loadingStartListener;
 
-    public interface LoadingStartListener{
+    private RotateAnimation loadingAnimation;
+
+    public interface LoadingStartListener {
         void onLoadingStart();
     }
 
@@ -63,8 +68,8 @@ public class PullToRefreshListView extends LinearLayout {
         listView = new ListView(context);
     }
 
-    public void init(View headerView, Context context){
-        if(this.headerView != null){
+    public void init(View headerView, Context context) {
+        if (this.headerView != null) {
             return;
         }
         this.headerView = headerView;
@@ -85,9 +90,12 @@ public class PullToRefreshListView extends LinearLayout {
         this.loadingStartListener = loadingStartListener;
     }
 
-    public void onLoadingFinish(){
-        if(currentState == State.LOADING){
+    public void onLoadingFinish() {
+        if (currentState == State.LOADING) {
             reset();
+        }
+        if(loadingAnimation != null){
+            loadingAnimation.cancel();
         }
     }
 
@@ -97,55 +105,55 @@ public class PullToRefreshListView extends LinearLayout {
     }
 
     public void setOverScrollHeight(float scrollY) {
-        if(scrollY < headerMaxHeight){
-            if(headerView.getVisibility() != View.VISIBLE){
+        if (scrollY < headerMaxHeight) {
+            if (headerView.getVisibility() != View.VISIBLE) {
                 headerView.setVisibility(View.VISIBLE);
             }
             scrollTo(0, headerMaxHeight - (int) scrollY);
             ViewGroup.LayoutParams params = listView.getLayoutParams();
-            params.height = ScreenUtils.getScreenHeight(getContext())  - (int) scrollY;
+            params.height = ScreenUtils.getScreenHeight(getContext()) - (int) scrollY;
             listView.setLayoutParams(params);
         }
     }
 
     @Override
-     public boolean onInterceptTouchEvent(MotionEvent event){
+    public boolean onInterceptTouchEvent(MotionEvent event) {
         return true;
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event){
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
             currentMotionSeriesStartY = event.getY();
             listView.onTouchEvent(event);
-        }else if(event.getAction() == MotionEvent.ACTION_MOVE){
-            if(currentState == State.LOADING || currentState == State.RESETTING){
+        } else if (event.getAction() == MotionEvent.ACTION_MOVE) {
+            if (currentState == State.LOADING || currentState == State.RESETTING) {
                 return true;
             }
-            if(event.getY() > currentMotionSeriesStartY
+            if (event.getY() > currentMotionSeriesStartY
                     && listView.getFirstVisiblePosition() == 0
-                    && listView.getChildAt(0).getY() == 0){
+                    && listView.getChildAt(0).getY() == 0) {
                 currentState = State.DRAGGING;
-                if(currentDragStartY == 0){
+                if (currentDragStartY == 0) {
                     currentDragStartY = event.getY();
                 }
                 float deltaY = event.getY() - currentDragStartY;
-                if(deltaY > RELEASE_TO_REFRESH_THRESHOLD){
+                if (deltaY > RELEASE_TO_REFRESH_THRESHOLD) {
                     currentState = State.RELEASE_TO_REFRESH;
-                    TextView headerTextView= (TextView) headerView.findViewById(R.id.headerTextView);
+                    TextView headerTextView = (TextView) headerView.findViewById(R.id.headerTextView);
                     headerTextView.setText("Release To Refresh");
-                }else{
+                } else {
                     currentState = State.DRAGGING;
                 }
                 setOverScrollHeight(deltaY);
-            }else {
+            } else {
                 currentState = State.NO_OVERSCROLL;
                 listView.onTouchEvent(event);
             }
-        }else if(event.getAction() == MotionEvent.ACTION_UP){
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
             listView.onTouchEvent(event);
             onMotionSeriesFinish(event);
-        }else if(event.getAction() == MotionEvent.ACTION_CANCEL){
+        } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
             listView.onTouchEvent(event);
             onMotionSeriesFinish(event);
         }
@@ -155,12 +163,20 @@ public class PullToRefreshListView extends LinearLayout {
     private void onMotionSeriesFinish(MotionEvent event) {
         currentDragStartY = 0;
         currentMotionSeriesStartY = 0;
-        if(currentState == State.RELEASE_TO_REFRESH){
-            if(loadingStartListener != null){
+        if (currentState == State.RELEASE_TO_REFRESH) {
+            if (loadingStartListener != null) {
                 loadingStartListener.onLoadingStart();
                 currentState = State.LOADING;
+
+                loadingAnimation = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                ImageView hintImageView = (ImageView) headerView.findViewById(R.id.hintImageView);
+                hintImageView.setAnimation(loadingAnimation);
+                loadingAnimation.setDuration(3000);
+                loadingAnimation.setRepeatMode(Animation.RESTART);
+                loadingAnimation.startNow();
+                headerView.invalidate();
             }
-        }else if(currentState == State.DRAGGING){
+        } else if (currentState == State.DRAGGING) {
             reset();
         }
     }
@@ -206,5 +222,6 @@ public class PullToRefreshListView extends LinearLayout {
             }
         });
         animator.start();
+
     }
 }
